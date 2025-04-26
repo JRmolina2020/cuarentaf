@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
   {
     // Llamar a todos los seeders
     $this->call([
-      PermissionSeeder::class,
       ClientSeeder::class,
       TypeDocumentSeeder::class,
       MoneySeeder::class,
+      PermissionSeeder::class,
       // Agrega más seeders si los tienes
     ]);
   }

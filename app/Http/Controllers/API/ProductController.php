@@ -30,7 +30,6 @@ class ProductController extends Controller
                 'c.id as idc',
             )
             ->where('p.status', $status)
-            ->where('p.stock', '>', 0)
             ->orderBy('p.stock', 'DESC')->get();
         return $products;
     }
