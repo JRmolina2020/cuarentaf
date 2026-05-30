@@ -82,7 +82,9 @@ class FactureController extends Controller
                 'c.id as idc',
                 't.fac_int',
                 'f.phonef',
-                'f.numberf'
+                'f.numberf',
+                'f.numbering_range_id',
+                'f.canceled'
 
             )
             ->where('f.date_facture', $date)
@@ -132,9 +134,10 @@ class FactureController extends Controller
                 'c.phone',
                 'c.email',
                 'f.created_at',
+                'f.phonef',
                 'f.numberf',
                 't.fac_int',
-                'f.phonef'
+                'f..numbering_range_id'
 
             )
             ->where('f.id', '=', $id)
@@ -163,6 +166,7 @@ class FactureController extends Controller
                 DB::raw('SUM(other) as other'),
             )->where('date_facture', $date)
             ->where('status', 1)
+            ->where('canceled', 0)
             ->get();
         return $facture_tot;
     }
@@ -176,6 +180,7 @@ class FactureController extends Controller
             ->where('date_facture', $date)
             ->where('type_sale', $type)
             ->where('status', 1)
+            ->where('canceled', 0)
             ->get();
         return $facture_tot;
     }
@@ -186,6 +191,7 @@ class FactureController extends Controller
             ->join('users as u', 'f.user_id', '=', 'u.id')
             ->select('c.fullname as name', 'f.date_facture as date', 'f.tot', 'u.name as user')
             ->where('c.id', $id)
+            ->where('f.status', 1)
             ->orderBy('f.date_facture', 'DESC')
             ->limit('5')
             ->get();
@@ -208,6 +214,7 @@ class FactureController extends Controller
             ->groupBy('p.name', 'p.cost', 'p.id')
             ->whereBetween('f.date_facture', [$date, $datetwo])
             ->where('f.status', 1)
+            ->where('canceled', 0)
             ->where('p.categorie_id', $type)
             ->get();
         return $gain;
@@ -224,6 +231,7 @@ class FactureController extends Controller
             )
             ->whereBetween('f.date_facture', [$date, $datetwo])
             ->where('f.status', 1)
+            ->where('canceled', 0)
             ->where('p.categorie_id', $type)
 
             ->get();
@@ -241,6 +249,7 @@ class FactureController extends Controller
             )
             ->whereBetween('f.date_facture', [$date, $datetwo])
             ->where('f.status', 1)
+            ->where('canceled', 0)
             ->get();
         return $gain_tot;
     }
@@ -259,6 +268,7 @@ class FactureController extends Controller
             ->whereBetween('f.date_facture', [$date, $datetwo])
             ->where('f.status', 1)
             ->where('p.status', 1)
+            ->where('canceled', 0)
             ->where('p.categorie_id', $type)
             ->get();
         return $gain_tot;
@@ -276,6 +286,7 @@ class FactureController extends Controller
             ->whereBetween('f.date_facture', [$date, $datetwo])
             ->where('f.status', 1)
             ->where('p.status', 1)
+            ->where('canceled', 0)
             ->get();
         return $gain_tot;
     }
@@ -301,6 +312,7 @@ class FactureController extends Controller
             )
             ->groupBy('u.name')
             ->where('f.status', 1)
+            ->where('canceled', 0)
             ->whereBetween('f.date_facture', [$date, $datetwo])
             ->get();
         return $user_tot;
@@ -343,7 +355,8 @@ class FactureController extends Controller
             DB::raw('MONTH(date_facture) as month'),
             DB::raw('SUM(tot) as total_sales')
         )
-            ->where('status', 1) // Filtra solo facturas con status = 1
+            ->where('status', 1)
+            ->where('canceled', 0)
             ->groupBy(DB::raw('MONTH(date_facture)'))
             ->orderBy(DB::raw('MONTH(date_facture)'))
             ->get();
@@ -356,7 +369,8 @@ class FactureController extends Controller
             DB::raw('WEEK(date_facture) as week'),
             DB::raw('SUM(tot) as total_sales')
         )
-            ->where('status', 1) // Filtra solo facturas con status = 1
+            ->where('status', 1)
+            ->where('canceled', 0)
             ->groupBy(DB::raw('WEEK(date_facture)'))
             ->orderBy(DB::raw('WEEK(date_facture)'))
             ->get();
@@ -370,7 +384,8 @@ class FactureController extends Controller
             ->join('facture_details', 'products.id', '=', 'facture_details.product_id')
             ->join('factures', 'factures.id', '=', 'facture_details.facture_id')
             ->select('products.id', 'products.name', DB::raw('SUM(facture_details.quantity * facture_details.price) as total_profit'))
-            ->where('factures.status', 1) // Solo ventas con status = 1
+            ->where('factures.status', 1)
+            ->where('canceled', 0)
             ->groupBy('products.name', 'products.id')
             ->orderByDesc('total_profit')
             ->take(10)

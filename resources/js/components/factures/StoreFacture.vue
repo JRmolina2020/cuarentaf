@@ -133,7 +133,9 @@
                             v-validate="{
                                 required: true,
                                 min_value: 0,
-                                max_value: formFacture.dataDetails[pindex].sub,
+                                max_value: formFacture.dataDetails[pindex]
+                                    ? formFacture.dataDetails[pindex].sub
+                                    : 0,
                             }"
                             :class="{
                                 'is-invalid':
@@ -189,7 +191,7 @@
                     <div class="form-group">
                         <label>Cliente</label>
                         <v-select
-                            :options="clients"
+                            :options="clientsactive"
                             v-model="formFacture.client_id"
                             :reduce="(clients) => clients.id"
                             label="fullname"
@@ -342,34 +344,6 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-6 col-lg-2">
-                    <label for="status">Tipo de factura</label>
-                    <select
-                        @change="Facture_int()"
-                        class="form-control form-control-sm"
-                        v-model="fac_int"
-                    >
-                        <option value="1">Factura interna</option>
-                        <option value="0">Factura Pos electronica</option>
-                    </select>
-                </div>
-                <div v-if="statusselect == false" class="col-6 col-lg-2">
-                    <label for="status">Documento</label>
-
-                    <select
-                        class="form-control form-control-sm"
-                        v-model="formFacture.numbering_range_id"
-                    >
-                        <option
-                            v-for="range in numberingRanges"
-                            :key="range.code"
-                            :value="range.code"
-                        >
-                            {{ range.type }} - {{ range.prefijo }}
-                        </option>
-                    </select>
-                </div>
-                <div v-else>cargando...</div>
             </div>
             <div class="row">
                 <div class="col-lg-12">
@@ -451,16 +425,6 @@
                         </h5>
                         <div>
                             <button
-                                type="button"
-                                @click="
-                                    (divproduct = true), (sendproduct = true)
-                                "
-                                class="btn bg-black btn-sm"
-                            >
-                                <i class="fi fi-flash"></i>
-                            </button>
-
-                            <button
                                 @click="calculateEfecty()"
                                 type="button"
                                 class="btn btn-danger btn-sm"
@@ -479,72 +443,7 @@
                                 placeholder="Buscar productos"
                             />
                         </div>
-                        <div v-if="divproduct">
-                            <form
-                                method="POST"
-                                @submit.enter.prevent="addProduct()"
-                                autocomplete="off"
-                                onKeyPress="if(event.keyCode == 13) event.returnValue = false;"
-                            >
-                                <div class="row">
-                                    <div class="col-lg-4 col-md-6">
-                                        <div class="form-group">
-                                            <label for>Nombre</label>
-                                            <input
-                                                required
-                                                type="text"
-                                                class="form-control form-control-sm"
-                                                v-model="product.name"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4 col-md-6">
-                                        <div class="form-group">
-                                            <label for>Precio mayorista</label>
-                                            <currency-input
-                                                required
-                                                class="form-control form-control-sm"
-                                                v-currency="{
-                                                    currency: 'USD',
-                                                    precision: 0,
-                                                    locale: 'en',
-                                                }"
-                                                v-model.number="product.price"
-                                                name="precio de compra"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    v-if="!sendproduct"
-                                    class="btn btn-dark btn-sm"
-                                    type="button"
-                                    disabled
-                                >
-                                    <span
-                                        class="spinner-border spinner-border-sm"
-                                        role="status"
-                                        aria-hidden="true"
-                                    ></span>
-                                    Loading...
-                                </button>
-                                <button
-                                    v-if="sendproduct"
-                                    :disabled="errors.any()"
-                                    type="submit"
-                                    class="btn btn-dark btn-sm"
-                                >
-                                    <i class="fi fi-check"></i>
-                                </button>
-                                <button
-                                    type="button"
-                                    @click="divproduct = false"
-                                    class="btn btn-danger btn-sm"
-                                >
-                                    <i class="fi fi-close-a"></i>
-                                </button>
-                            </form>
-                        </div>
+
                         <div class="row mt-3">
                             <div
                                 v-for="(item, index) in filteredList"
@@ -552,19 +451,6 @@
                                 class="col-4"
                             >
                                 <div
-                                    v-if="item.stock <= 0"
-                                    class="card text-white bg-dark mb-3"
-                                    style="max-width"
-                                >
-                                    <div class="card-body">
-                                        {{ item.name }}<br />
-                                        <span class="badge bg-danger"
-                                            >Agotado</span
-                                        >
-                                    </div>
-                                </div>
-                                <div
-                                    v-else
                                     class="card text-white bg-dark mb-3"
                                     style="max-width"
                                     @click="addRow(item, index)"
@@ -653,11 +539,12 @@ export default {
                 status: 1,
                 user: 1,
                 type_sale: 1,
-                numbering_range_id: "",
+                numbering_range_id: 1,
                 phonef: 0,
                 dataDetails: [],
             },
             fac_int: 1,
+            quantitydoc: 20,
         };
     },
     mixins: [date_facture],
@@ -667,14 +554,13 @@ export default {
         this.formFacture.type_sale = "Bancolombia";
         this.$store.dispatch("Useractions");
         this.$store.dispatch("MoneySigleactions");
-        this.Facture_int();
     },
     computed: {
         ...mapState([
             "urlfactures",
             "urlproducts",
             "users",
-            "clients",
+            "clientsactive",
             "products",
             "moneySingle",
         ]),
@@ -740,28 +626,17 @@ export default {
                     timer: 1500,
                 });
 
-                let idfd = response.data.factura.id;
+                this.tabledark = false;
                 this.send = true;
-                this.enviarfac(idfd);
+                // this.enviarfac(idfd);
                 this.clear();
             } catch (error) {
                 console.log(error.response);
             }
         },
-        async enviarfac(id) {
-            if (this.fac_int == 0) {
-                try {
-                    const respuesta = await axios.post("/invoices", {
-                        id: id,
-                    });
-                    console.log("factura electronica");
-                } catch (error) {}
-            } else {
-                console.log("prefijo interno");
-            }
-        },
+
         getData() {
-            this.$store.dispatch("Clientactions");
+            this.$store.dispatch("ClientActiveactions");
             this.$store.dispatch("Productactions", 1);
         },
         async addProduct() {
@@ -815,7 +690,7 @@ export default {
             for (let i = 0; i < this.formFacture.dataDetails.length; i++) {
                 this.discDetail[i] = 0;
             }
-            //evitar valores duplicados en this.ProductRowUnique();
+            this.ProductRowUnique();
         },
         ProductRowUnique() {
             const cartProduct = this.formFacture.dataDetails.reduce(
@@ -874,7 +749,6 @@ export default {
             this.formFacture.phonef = 0;
             this.price = [];
             this.fac_int = 1;
-            this.Facture_int();
         },
         typeSale() {
             if (this.type_sale == 1) {
@@ -927,36 +801,6 @@ export default {
             this.tabledark = true;
             this.pindex = index;
             this.pname = name;
-        },
-        Facture_int() {
-            this.fetchNumberingRanges(this.fac_int);
-        },
-        async fetchNumberingRanges(fac_int) {
-            console.log(fac_int);
-            this.statusselect = true;
-            try {
-                // Realiza la petición GET al endpoint
-                const response = await axios.get("api/type-documents", {
-                    params: {
-                        fac_int: fac_int,
-                    },
-                });
-
-                this.numberingRanges = response.data;
-                this.statusselect = false;
-            } catch (error) {
-                console.error(
-                    "Error al obtener los rangos de numeración:",
-                    error
-                );
-            }
-            this.initSelectDocument();
-        },
-        initSelectDocument() {
-            if (this.numberingRanges.length > 0) {
-                this.formFacture.numbering_range_id =
-                    this.numberingRanges[0].code;
-            }
         },
     },
 };

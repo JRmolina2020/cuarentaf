@@ -10,7 +10,7 @@
         </div>
         <div class="row">
             <div class="col-lg-6 col-12">
-                <h2>Top 10 Productos más Rentables</h2>
+                <h5>Top 10 Productos más Rentables</h5>
                 <canvas id="profitChart"></canvas>
             </div>
         </div>
@@ -245,7 +245,7 @@ export default {
                     labels,
                     datasets: [
                         {
-                            label: "Ganancia Total",
+                            label: "Venta Total",
                             data,
                             backgroundColor: backgroundColors,
                             borderColor: borderColors,

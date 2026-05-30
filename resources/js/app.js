@@ -128,8 +128,31 @@ Vue.component(
     require("./components/facture.vue").default
 );
 
+Vue.component(
+    "document_example",
+    require("./components/documents/Example.vue").default
+);
+Vue.component(
+    "clientc_example",
+    require("./components/clients/Clientc.vue").default
+);
+Vue.component(
+    "credit_example",
+    require("./components/credits/Credit.vue").default
+);
 
+Vue.filter('formatearFecha', function(value) {
+  if (!value) return '';
 
+  const [year, month, day] = value.split('-');
+  const fechaLocal = new Date(year, month - 1, day); // Mes inicia desde 0
+
+  return fechaLocal.toLocaleDateString('es-CO', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+});
 import auth from "./mixins/Auth.js";
 Vue.mixin(auth);
 const app = new Vue({

@@ -16,6 +16,8 @@ class DataService
             ->where('factures.id', $id)
             ->select(
                 'factures.id',
+                'factures.bill_id',
+                'factures.numberf',
                 'factures.created_at',
                 'factures.date_facture',
                 'factures.tot',

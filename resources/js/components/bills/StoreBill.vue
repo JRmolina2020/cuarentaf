@@ -41,7 +41,7 @@
                                     name="concepto"
                                 />
                                 <div
-                                    v-if="submitted && errors.has('concerpto')"
+                                    v-if="submitted && errors.has('concepto')"
                                     class="invalid-feedback"
                                 >
                                     {{ errors.first("concepto") }}

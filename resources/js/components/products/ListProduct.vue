@@ -9,14 +9,9 @@
             />
         </div>
 
-        <select @change="state()" v-model="state_v" class="custom-select">
-            <option value="1">Activos</option>
-            <option value="0">Inactivos</option>
-        </select>
-
         <div class="table-responsive mt-3">
             <VTable
-                :data="products"
+                :data="productspro"
                 :filters="filters"
                 :page-size="10"
                 :currentPage.sync="currentPage"
@@ -35,7 +30,11 @@
                     </tr>
                 </template>
                 <template #body="{ rows }">
-                    <tr v-for="row in rows" :key="row.id">
+                    <tr
+                        v-for="row in rows"
+                        :key="row.id"
+                        class="small py-1 border-0"
+                    >
                         <td class="bg-danger" v-if="row.cost == 0">
                             {{ row.name }}
                         </td>
@@ -50,7 +49,7 @@
                                 type="button"
                                 @click="thestatus(row, urlproducts, prefijo)"
                                 v-bind:class="{
-                                    'btn btn-block  btn-sm': true,
+                                    'btn btn-block  btn-xs': true,
                                     'btn-success': row.status,
                                     'btn-danger': row.status == 0,
                                 }"
@@ -70,7 +69,7 @@
                             <button
                                 type="button"
                                 @click="$emit('show', row)"
-                                class="btn bg-warning btn-sm"
+                                class="btn bg-warning btn-xs"
                             >
                                 <i class="fi fi-eye"></i>
                             </button>
@@ -171,7 +170,7 @@ export default {
     },
     mixins: [state_modified],
     computed: {
-        ...mapState(["products", "status", "urlproducts"]),
+        ...mapState(["productspro", "status", "urlproducts"]),
     },
     components: {
         ModalInfo,
@@ -183,15 +182,9 @@ export default {
         barcodeTot() {
             this.barcodeint = this.barcodeint2;
         },
-        state() {
-            if (this.state_v == 1) {
-                this.$store.dispatch("Productactions", 1);
-            } else {
-                this.$store.dispatch("Productactions", 0);
-            }
-        },
+
         getList() {
-            this.$store.dispatch("Productactions", this.state_v);
+            this.$store.dispatch("Productproactions");
         },
     },
 };

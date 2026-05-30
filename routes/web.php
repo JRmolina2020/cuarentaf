@@ -19,10 +19,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\API\FaceController;
 use App\Http\Controllers\API\BalanceController;
 use App\Http\Controllers\API\FactusController;
+use App\Http\Controllers\API\NotefactusController;
 use App\Http\Controllers\API\FactusInvoiceController;
-use App\Http\Controllers\API\NumberingRangeController;
+use App\Http\Controllers\API\SuscripcionController;
 use App\Http\Controllers\API\TypeDocumentController;
-
+use App\Http\Controllers\API\CreditNoteController;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 
@@ -39,10 +41,8 @@ Route::get('/facture/{id}', function ($id) {
 
 
 Route::post('/invoices', [FactusController::class, 'sendInvoice']);
-Route::get('/invoicesget', [FactusInvoiceController::class, 'getInvoices']);
-Route::get('/numbering-ranges', [NumberingRangeController::class, 'index']);
-
-
+Route::post('/sendemail', [FactusController::class, 'sendEmail']);
+Route::post('/notes', [NotefactusController::class, 'sendNote']);
 Route::get('/facturepUnique/{id}', [FactureController::class, 'factureUnique'])->where('id', '[0-9]+');
 Route::get('/detailsp/{id}', [FactureDetailController::class, 'index'])->where('id', '[0-9]+');
 
@@ -71,6 +71,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/perfil', function () {
         return view('users.profile');
     });
+    Route::get('documents', function () {
+        return view('documents');
+    });
     Route::get('/categorias', function () {
         return view('categories.index');
     });
@@ -79,6 +82,9 @@ Route::group(['middleware' => 'auth'], function () {
     });
     Route::get('/clientes', function () {
         return view('clients.index');
+    });
+    Route::get('/cartera', function () {
+        return view('clientsc');
     });
     Route::get('/proveedores', function () {
         return view('provider.index');
@@ -109,6 +115,9 @@ Route::group(['middleware' => 'auth'], function () {
     });
     Route::get('/proveedores', function () {
         return view('provider.index');
+    })->middleware('permission:seguridad');
+    Route::get('/credits', function () {
+        return view('credits.index');
     });
     Route::get('/get-permissions', function () {
         return auth()->check() ? auth()->user()->jsPermissions() : 0;
@@ -118,9 +127,10 @@ Route::group(['middleware' => 'auth'], function () {
 
         //routes app fuctions
         //fe
-
+        Route::get('/suscripcion', [SuscripcionController::class, 'mostrar']);
         //routes users
         Route::get('/users', [UserController::class, 'index']);
+        Route::get('/usersall', [UserController::class, 'indexall']);
         Route::post('users', [UserController::class, 'store']);
         Route::put('/user/password/{id}', [UserController::class, 'updatePassword'])->where('id', '[0-9]+');
         Route::put('/users/{id}', [UserController::class, 'update']);
@@ -142,6 +152,8 @@ Route::group(['middleware' => 'auth'], function () {
         //end
         //products
         Route::get('/products/{status}', [ProductController::class, 'index'])->where('id', '[0-9]+');
+        Route::get('/productspro', [ProductController::class, 'indexpro'])->where('id', '[0-9]+');
+        Route::get('/productsIncome', [ProductController::class, 'indexIncome'])->where('id', '[0-9]+');
         Route::get('/productstock', [ProductController::class, 'index2']);
         Route::get('/productsr', [ProductController::class, 'index_three']);
         Route::post('products', [ProductController::class, 'store']);
@@ -150,6 +162,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('products/locked/{id}', [ProductController::class, 'locked'])->where('id', '[0-9]+');
         Route::get('products/check-code/{code}', [ProductController::class, 'checkCode']);
         Route::get('productsI/', [ProductController::class, 'indexInventory']);
+        Route::post('/products/reset-stock', [ProductController::class, 'resetStock']);
 
 
         //categories
@@ -159,9 +172,10 @@ Route::group(['middleware' => 'auth'], function () {
         //
         //clients
         Route::get('/clients', [ClientController::class, 'index']);
+        Route::get('/clientsactive', [ClientController::class, 'indexactive']);
         Route::post('clients', [ClientController::class, 'store']);
         Route::put('/clients/{id}', [ClientController::class, 'update'])->where('id', '[0-9]+');
-        Route::delete('/clients/{id}', [ClientController::class, 'destroy'])->where('id', '[0-9]+');
+        Route::put('/clients/{id}/toggle-status', [ClientController::class, 'toggleStatus']);
         //end
         //facture
         Route::post('factures', [FactureController::class, 'store']);
@@ -228,5 +242,16 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/balances/{id}', [BalanceController::class, 'getBalanceByProvider']);
         Route::get('/balancesTot/{id}', [BalanceController::class, 'getBalanceByProviderTot']);
         Route::get('/type-documents', [TypeDocumentController::class, 'index']);
+        Route::get('/documents', [TypeDocumentController::class, 'indexAll']);
+        Route::get('/documents/check-code/{code}', [TypeDocumentController::class, 'checkCode']);
+        Route::post('/documents', [TypeDocumentController::class, 'store']);
+        Route::put('/documents/{id}/toggle-status', [TypeDocumentController::class, 'toggleStatus']);
+        //credit
+        Route::get('/credit', [CreditNoteController::class, 'index']);
+
+        Route::get('/test-pdf', function () {
+            $pdf = Pdf::loadHTML('<h1>¡Hola Mauro, DomPDF funciona!</h1>');
+            return $pdf->stream();
+        });
     });
 });

@@ -121,13 +121,14 @@ export default {
         ModalResource,
     },
     computed: {
-        ...mapState(["urlincome", "products"]),
+        ...mapState(["urlincome"]),
     },
     data() {
         return {
             actions: "Incomeactions",
             submitted: true,
             send: true,
+            products: [],
             form: {
                 id: null,
                 product_id: null,
@@ -147,7 +148,10 @@ export default {
             this.clear();
         },
         getProduct() {
-            this.$store.dispatch("Productactions", 1);
+            axios
+                .get("/api/productsIncome")
+                .then((res) => (this.products = res.data))
+                .catch((err) => console.error(err));
         },
         add() {
             this.$validator.validate().then((valid) => {

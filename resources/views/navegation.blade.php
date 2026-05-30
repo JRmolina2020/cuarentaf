@@ -36,7 +36,7 @@
     @endrole
     <li class="nav-item">
       <a href="{{ url('gastos') }}" class="nav-link">
-        <i class="fi fi-credit-card"></i>
+        <i class='bx bx-credit-card'></i>
         <p>Gastos</p>
       </a>
     </li>
@@ -48,7 +48,7 @@
     </li>
     <li class="nav-item">
       <a href="{{ url('categorias') }}" class="nav-link">
-        <i class="fi fi-sunglasses-alt"></i>
+        <i class="bx bx-user"></i>
         <p>Categorias</p>
       </a>
     </li>
@@ -79,6 +79,12 @@
       </a>
     </li>
     <li class="nav-item">
+      <a href="{{ url('cartera') }}" class="nav-link">
+        <i class="fi fi-user"></i>
+        <p>Cartera</p>
+      </a>
+    </li>
+    <li class="nav-item">
       <a href="{{ url('facturas') }}" class="nav-link">
         <i class="fi fi-shopify"></i>
         <p>Facturas</p>
@@ -90,6 +96,7 @@
         <p>Facturas pendiente</p>
       </a>
     </li>
+
     @hasrole('administrador')
     <li class="nav-item">
       <a href="{{ url('fupdate') }}" class="nav-link">
@@ -97,8 +104,20 @@
         <p>Moficar factura</p>
       </a>
     </li>
+    <li class="nav-item">
+      <a href="{{ url('credits') }}" class="nav-link">
+        <i class="fi fi-shopify"></i>
+        <p>Notas credito</p>
+      </a>
+    </li>
     @endrole
     @hasrole('administrador')
+    <li class="nav-item">
+      <a href="{{ url('documents') }}" class="nav-link">
+        <i class="fi fi-credit-card"></i>
+        <p>Documentos</p>
+      </a>
+    </li>
     <li class="nav-item">
       <a href="{{ url('cuentas') }}" class="nav-link">
         <i class="fi fi-credit-card"></i>

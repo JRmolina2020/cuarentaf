@@ -23,7 +23,9 @@
   <link rel="shortcut icon" type="image/png" href="{{secure_asset('/img/favicon.ico') }}">
   <link rel="shortcut icon" sizes="192x192" href="{{secure_asset('/img/favicon.ico') }}">
   <link rel="stylesheet" href="{{secure_asset('css/lte.min.css') }}">
+ <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fontisto@v3.0.4/css/fontisto/fontisto.min.css"></i>
+  
 
 </head>
 <style>

@@ -3,26 +3,6 @@
         <div v-if="viewfac">
             <div v-if="status">
                 <div class="row">
-                    <div class="col-lg-4 col-xs-12 col-sm-12 col-md-12">
-                        <div
-                            class="alert alert-success alert-dismissible fade show"
-                            role="alert"
-                        >
-                            <strong>Hola :)</strong> Estas son las ventas del
-                            dia
-                            <button
-                                type="button"
-                                class="close"
-                                data-dismiss="alert"
-                                aria-label="Close"
-                            >
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
                     <div class="col-lg-3">
                         <div class="input-group">
                             <input
@@ -31,6 +11,7 @@
                                 v-model="date"
                                 placeholder=".form-control-sm"
                             />
+
                             <div class="input-group-append">
                                 <button
                                     class="btn btn-outline-secondary btn-sm"
@@ -89,17 +70,40 @@
                                 <th>Vendedor</th>
                                 <th>Estado</th>
                                 <th>POS</th>
-                                <th>Fac</th>
-
+                                <th></th>
+                                <th></th>
                                 <th>E</th>
                             </tr>
                         </template>
+
                         <template #body="{ rows }">
-                            <tr v-for="row in rows" :key="row.id">
-                                <td :class="!row.fac_int ? 'table-dark' : ''">
+                            <tr
+                                v-for="row in rows"
+                                :key="row.id"
+                                :class="{ 'table-danger': row.canceled }"
+                            >
+                                <td v-if="row.numbering_range_id == 1">
                                     {{ row.id }}
                                 </td>
-                                <td>{{ row.numberf }}</td>
+                                <td v-else class="bg-dark text-white">
+                                    {{ row.id }}
+                                </td>
+
+                                <td v-if="row.numberf">
+                                    {{ row.numberf }}
+
+                                    <span
+                                        v-if="row.canceled"
+                                        class="badge bg-danger"
+                                    >
+                                        Fac Anulada
+                                    </span>
+                                </td>
+                                <td v-else>
+                                    <span class="badge bg-primary">
+                                        interno
+                                    </span>
+                                </td>
                                 <td>${{ row.tot | currency }}</td>
                                 <td>${{ row.efecty | currency }}</td>
                                 <td>${{ row.other | currency }}</td>
@@ -136,16 +140,39 @@
                                 </td>
                                 <td>
                                     <button
-                                        class="btn bg-primary btn-sm"
-                                        @click="viewTabledetail(row.id)"
+                                        type="button"
+                                        @click="mostrarAlerta(row)"
+                                        class="btn bg-black btn-sm"
                                     >
-                                        <i class="fi fi-shopping-basket"></i>
+                                        <i class="fi fi-eye"></i>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button
+                                        v-can="'electronica'"
+                                        v-if="!row.numberf"
+                                        type="button"
+                                        @click="sendfac(row)"
+                                        class="btn bg-success btn-sm"
+                                    >
+                                        <i class="fi fi-check"></i>
+                                    </button>
+                                    <button
+                                        v-if="row.numberf && !row.canceled"
+                                        v-can="'electronica'"
+                                        type="button"
+                                        @click="sendNote(row)"
+                                        class="btn bg-danger btn-sm"
+                                    >
+                                        <i class="fi fi-export"></i>
                                     </button>
                                 </td>
 
-                                <td v-can="'eliminar factura'">
+                                <td
+                                    v-if="row.numbering_range_id == 1"
+                                    v-can="'eliminar factura'"
+                                >
                                     <button
-                                        v-if="row.fac_int"
                                         type="button"
                                         @click="destroy(row.id)"
                                         class="btn bg-danger btn-sm"
@@ -153,6 +180,7 @@
                                         <i class="fi fi-trash"></i>
                                     </button>
                                 </td>
+                                <td v-else></td>
                             </tr>
                         </template>
                     </VTable>
@@ -255,14 +283,17 @@
         <div v-else>
             <ModalFac :cod="cod"></ModalFac>
         </div>
+        <div v-if="showAlerta" class="alerta-flotante">
+            <button class="cerrar-alerta" @click="showAlerta = false">×</button>
+            <div v-for="item in details" :key="item.id">
+                {{ item.name }} - {{ item.quantity }} x {{ item.price }}
+            </div>
+        </div>
     </div>
 </template>
 <script>
 import { mapState } from "vuex";
-
 import ModalTicket from "../utilities/modalticket";
-
-import ModalFac from "../utilities/modalfac";
 import VueHtmlToPaper from "vue-html-to-paper";
 
 const options = {
@@ -287,12 +318,13 @@ export default {
             totalPages: 1,
             currentPage: 1,
             search_sale: "",
+            showAlerta: false,
+            alertaMensaje: "",
         };
     },
     mixins: [MgetList],
     components: {
         ModalTicket,
-        ModalFac,
     },
     computed: {
         ...mapState([
@@ -308,6 +340,7 @@ export default {
             "products",
             "company",
             "facUnique",
+            "details",
         ]),
     },
 
@@ -361,16 +394,6 @@ export default {
             }
         },
 
-        async emailFac(id) {
-            Swal.fire("Enviando...");
-            let url = "api/emailfac/" + id;
-            let response = await axios.get(url);
-            try {
-                Swal.fire("Realizado!", "success");
-            } catch (error) {
-                console.log(error);
-            }
-        },
         viewTabledetail(id) {
             this.viewfac = 0;
             this.cod = id;
@@ -406,7 +429,6 @@ export default {
         Wppfacture(id) {
             axios.get("/api/factureUnique/" + id).then((response) => {
                 let [{ sub, tot, phonef, date_facture }] = response.data;
-
                 axios.get("/api/details/" + id).then((detailsResponse) => {
                     const detalles = detailsResponse.data;
                     let lineas = "\n\n* Detalles de la compra:*\n";
@@ -434,6 +456,114 @@ export default {
                     window.open(url, "_blank");
                 });
             });
+        },
+        mostrarAlerta(row) {
+            this.showAlerta = true;
+            this.$store.dispatch("FactureDetailactions", row.id);
+        },
+        async sendNote(row) {
+            const result = await Swal.fire({
+                title: "¿Enviar nota crédito a la DIAN?",
+                html: `<p><strong>Total:</strong> $${parseFloat(
+                    row.tot
+                ).toLocaleString()}</p>`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, enviar",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Enviando nota crédito...",
+                    text: "Por favor espera",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                try {
+                    const response = await axios.post("/notes", {
+                        id: row.id,
+                    });
+
+                    this.getList();
+
+                    Swal.fire({
+                        title: response.data.message || "Nota crédito enviada",
+                        icon: "success",
+                        timer: 3000,
+                        showConfirmButton: false,
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        title: "Error al enviar",
+                        text:
+                            error.response?.data?.message ||
+                            "Ocurrió un error inesperado.",
+                        icon: "error",
+                    });
+                }
+            }
+        },
+        async sendfac(row) {
+            const result = await Swal.fire({
+                title: "¿Enviar factura a la DIAN?",
+                html: `<p><strong>Total:</strong> $${parseFloat(
+                    row.tot
+                ).toLocaleString()}</p>`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, enviar",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (result.isConfirmed) {
+                // Mostrar loader mientras se procesa
+                Swal.fire({
+                    title: "Enviando factura...",
+                    text: "Por favor espera",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                try {
+                    const response = await axios.post("/invoices", {
+                        id: row.id,
+                    });
+
+                    this.getList();
+
+                    Swal.fire({
+                        title: response.data.message || "Factura enviada",
+                        icon: "success",
+                        timer: 3000,
+                        showConfirmButton: false,
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        title: "Error al enviar",
+                        text:
+                            error.response?.data?.message ||
+                            "Ocurrió un error inesperado.",
+                        icon: "error",
+                    });
+                }
+            }
+        },
+        async sendEmail() {
+            try {
+                const res = await this.$axios.post("/sendemail", {
+                    id: 60,
+                });
+
+                console.log(res.data);
+            } catch (error) {
+                console.error(error.response?.data || error.message);
+            }
         },
     },
 };

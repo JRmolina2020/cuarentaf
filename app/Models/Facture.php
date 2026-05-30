@@ -21,7 +21,7 @@ class Facture extends Model
         'user_id',
         'cufe',
         'numbering_range_id',
-        'phonef'
+        'phonef',
     ];
     public function client()
     {

@@ -53,7 +53,7 @@ wwww
                                         :key="'a' + index"
                                     >
                                         <p
-                                            v-if="item.fac_int == 0"
+                                            v-if="item.numbering_range_id !== 1"
                                             style="font-size: 14px"
                                         >
                                             <strong style="font-size: 12px"
@@ -126,7 +126,7 @@ wwww
                                             PESOS</strong
                                         >
                                     </p>
-                                    <div v-if="item.fac_int == 0">
+                                    <div v-if="item.numbering_range_id !== 1">
                                         <p style="font-size: 10px">
                                             cufe: {{ item.cufe }}
                                         </p>
@@ -139,18 +139,18 @@ wwww
                                         >
                                             <qrcode
                                                 :text="sublink + item.cufe"
-                                                :size="70"
+                                                :size="120"
                                                 level="H"
                                             />
                                         </div>
                                     </div>
-                                    <div v-if="item.fac_int == 1">
+                                    <div v-else>
                                         <div
                                             class="d-flex justify-content-center"
                                         >
                                             <qrcode
                                                 :text="linkfacture"
-                                                :size="70"
+                                                :size="120"
                                                 level="H"
                                             />
                                         </div>

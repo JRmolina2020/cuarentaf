@@ -2,7 +2,7 @@
     <div>
         <section>
             <form
-                v-if="view"
+                v-show="!hasCompany || isEditing"
                 method="POST"
                 @submit.enter.prevent="add(form.id, actions, urlcompany)"
                 autocomplete="off"
@@ -213,20 +213,21 @@ export default {
     },
     computed: {
         ...mapState(["urlcompany", "company"]),
+        hasCompany() {
+            return this.company && Object.keys(this.company).length > 0;
+        },
+
+        showForm() {
+            return !this.hasCompany || this.isEditing;
+        },
     },
-    created() {
-        if (this.company.length == 0) {
-            this.view = 1;
-        } else {
-            this.view = 0;
-        }
-    },
+    created() {},
     data() {
         return {
             actions: "Companyactions",
             submitted: true,
             send: true,
-            view: 1,
+            isEditing: false,
             form: {
                 id: null,
                 nit: null,
@@ -242,7 +243,6 @@ export default {
     mixins: [add],
     methods: {
         show(row) {
-            this.view = 1;
             this.form.id = row.id;
             this.form.nit = row.nit;
             this.form.name = row.name;
@@ -253,9 +253,9 @@ export default {
             this.form.note = row.note;
             $("#model").modal("show");
             this.send = true;
+            this.isEditing = true;
         },
         clear() {
-            this.view = 0;
             this.form.id = "";
             this.form.nit = "";
             this.form.name = "";
@@ -266,6 +266,7 @@ export default {
             this.form.note = "";
             this.$validator.reset();
             this.send = true;
+            this.isEditing = false;
         },
     },
 };

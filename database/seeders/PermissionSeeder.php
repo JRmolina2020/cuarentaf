@@ -33,7 +33,8 @@ class PermissionSeeder extends Seeder
         array_push($permission_array, Permission::create(['name' => 'eliminar factura']));
         array_push($permission_array, Permission::create(['name' => 'precio update']));
         array_push($permission_array, Permission::create(['name' => 'eliminar gasto']));
-
+        array_push($permission_array, Permission::create(['name' => 'inventario']));
+        array_push($permission_array, Permission::create(['name' => 'electronica']));
         $adminTo->assignRole($role->id);
         $role->syncPermissions($permission_array);
     }

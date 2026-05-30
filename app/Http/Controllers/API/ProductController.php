@@ -30,13 +30,50 @@ class ProductController extends Controller
                 'c.id as idc',
             )
             ->where('p.status', $status)
+            ->where('p.stock', '>=', 1)
+            ->orderBy('p.stock', 'DESC')->get();
+        return $products;
+    }
+    public function indexpro()
+    {
+        $products = DB::table('products as p')
+            ->join('categories as c', 'c.id', '=', 'p.categorie_id')
+            ->select(
+                'p.id',
+                'p.name',
+                'p.code',
+                'p.price',
+                'p.price_two',
+                'p.cost',
+                'p.priceSv',
+                'p.price_twoSv',
+                'p.type_iva',
+                'p.stock',
+                'p.status',
+                'c.name as type',
+                'c.id as idc',
+            )
+            ->orderByRaw('CASE WHEN p.status = 0 THEN 1 ELSE 0 END')
+            ->orderBy('p.stock', 'DESC')
+            ->get();
+        return $products;
+    }
+    public function indexIncome()
+    {
+        $products = DB::table('products as p')
+            ->select(
+                'p.id',
+                'p.name',
+
+            )
+            ->where('p.status', 1)
             ->orderBy('p.stock', 'DESC')->get();
         return $products;
     }
     public function indexInventory()
     {
         $products = DB::table('products as p')
-            ->select('p.name', 'p.stock', 'p.code')
+            ->select('p.id', 'p.name', 'p.stock', 'p.code')
             ->where('p.status', 1)
             ->orderBy('p.stock', 'DESC')
             ->get();
@@ -141,5 +178,13 @@ class ProductController extends Controller
         $products->stock = 0;
         $products->save();
         return response()->json(["message" => "Ha sido Bloqueado"]);
+    }
+    public function resetStock(Request $request)
+    {
+        $ids = $request->input('ids');
+
+        Product::whereIn('id', $ids)->update(['stock' => 0]);
+
+        return response()->json(['message' => 'Stock reiniciado'], 200);
     }
 }

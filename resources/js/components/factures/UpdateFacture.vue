@@ -99,7 +99,7 @@
                         <div class="form-group">
                             <label>Cliente</label>
                             <v-select
-                                :options="clients"
+                                :options="clientsactive"
                                 v-model="form.client_id"
                                 :reduce="(clients) => clients.id"
                                 label="fullname"
@@ -236,7 +236,7 @@ export default {
         };
     },
     computed: {
-        ...mapState(["factures", "moneySingle", "users", "clients"]),
+        ...mapState(["factures", "moneySingle", "users", "clientsactive"]),
     },
     created() {
         this.getList();
@@ -290,7 +290,7 @@ export default {
             this.$store.dispatch("Factureactions", date_now);
             this.$store.dispatch("MoneySigleactions");
             this.$store.dispatch("Useractions");
-            this.$store.dispatch("Clientactions");
+            this.$store.dispatch("ClientActiveactions");
         },
         equalsTot() {
             this.form.other = this.form.tot - this.form.efecty;

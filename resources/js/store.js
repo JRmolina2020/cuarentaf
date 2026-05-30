@@ -8,14 +8,17 @@ export default new Vuex.Store({
         status_f:false,
         viewfx:1,
         users: [],
+        usersall: [],
         roles: [],
         permissions: [],
         products: [],
+        productspro: [],
         productstock: [],
         productsInventory: [],
         productsr:[],
         categories:[],
         clients: [],
+         clientsactive: [],
         provider: [],
         factures: [],
         factureState:[],
@@ -40,16 +43,21 @@ export default new Vuex.Store({
         incometot: [],
         balance:[],
         balanceTot:[],
+        document:[],
+        creditNote:[],
         status: false,
         urlusers: "/api/users",
+          urlusersall: "/api/usersall",
         urlroles: "/api/roles",
         urlpermissions: "/api/permissions",
         urlproducts: "/api/products",
+         urlproductspro: "/api/productspro",
         urlproductstock: "/api/productstock",
         urlproductsr: "/api/productsr",
         urlproductsI: "/api/productsI",
         urlcategories: "/api/categories",
         urlclients: "/api/clients",
+        urlclientsactive: "/api/clientsactive",
         urlprovider: "/api/provider",
         urlfactures: "/api/factures",
         urlfactureState: "/api/factureState",
@@ -77,6 +85,8 @@ export default new Vuex.Store({
         urlincometot: "api/incometwo",
         urlbalance: "api/balances",
         urlbalanceTot: "api/balancesTot",
+        urldocuments: "api/documents",
+        urlcredit:"api/credit"
     },
     mutations: {
         viewmutations(state, item) {
@@ -84,6 +94,9 @@ export default new Vuex.Store({
         },
         Usermutations(state, item) {
             state.users = item;
+        },
+         Userallmutations(state, item) {
+            state.usersall = item;
         },
         Rolemutations(state, item) {
             state.roles = item;
@@ -94,12 +107,23 @@ export default new Vuex.Store({
         Productmutations(state, item) {
             state.products = item;
         },
+          Productpromutations(state, item) {
+            state.productspro = item;
+        },
         Productstockmutations(state, item) {
             state.productstock = item;
         },
         Productrmutations(state, item) {
             state.productsr = item;
+            
         },
+          UPDATE_PRODUCT(state, product) {
+        const index = state.products.findIndex(p => p.id === product.id);
+
+        if (index !== -1) {
+            state.products.splice(index, 1, product);
+        }
+    },
         ProductImutations(state, item) {
             state.productsInventory = item;
         },
@@ -108,6 +132,9 @@ export default new Vuex.Store({
         },
         Clientmutations(state, item) {
             state.clients = item;
+        },
+         ClientActivemutations(state, item) {
+            state.clientsactive = item;
         },
         Providermutations(state, item) {
             state.provider = item;
@@ -189,6 +216,12 @@ export default new Vuex.Store({
         BalanceTotmutations(state, item) {
             state.balanceTot = item;
         },
+        Documentmutations(state, item) {
+            state.document = item;
+        },
+         Creditmutations(state, item) {
+            state.creditNote = item;
+        },
     },
 
     actions: {
@@ -204,6 +237,15 @@ export default new Vuex.Store({
             try {
                 let response = await axios.get(state.urlusers);
                 commit("Usermutations", response.data);
+                state.status = true;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        async Userallactions({ commit, state }) {
+            try {
+                let response = await axios.get(state.urlusersall);
+                commit("Userallmutations", response.data);
                 state.status = true;
             } catch (error) {
                 console.log(error);
@@ -231,8 +273,16 @@ export default new Vuex.Store({
         async Productactions({ commit, state },status) {
             try {
                 let response = await axios.get(`${state.urlproducts}/${status}`);
-               
                 commit("Productmutations", response.data);
+                state.status = true;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+         async Productproactions({ commit, state }) {
+            try {
+                let response = await axios.get(`${state.urlproductspro}`);
+                commit("Productpromutations", response.data);
                 state.status = true;
             } catch (error) {
                 console.log(error);
@@ -282,6 +332,15 @@ export default new Vuex.Store({
             try {
                 let response = await axios.get(state.urlclients);
                 commit("Clientmutations", response.data);
+                state.status = true;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        async ClientActiveactions({ commit, state }) {
+            try {
+                let response = await axios.get(state.urlclientsactive);
+                commit("ClientActivemutations", response.data);
                 state.status = true;
             } catch (error) {
                 console.log(error);
@@ -484,6 +543,7 @@ export default new Vuex.Store({
                 let response = await axios.get(state.urlcompany);
                 commit("Companymutations", response.data);
                 state.status = true;
+              
             } catch (error) {
                 console.log(error);
             }
@@ -577,8 +637,27 @@ export default new Vuex.Store({
                 state.status_f = false;
             }
            
-            
         },
+         async Documentactions({ commit, state }) {
+            try {
+                let response = await axios.get(state.urldocuments);
+                commit("Documentmutations", response.data);
+                state.status = true;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+         async Creditactions({ commit, state }) {
+            try {
+                let response = await axios.get(state.urlcredit);
+                commit("Creditmutations", response.data);
+                state.status = true;
+                console.log(response)
+            } catch (error) {
+                console.log(error);
+            }
+        },
+
 
     },
 });

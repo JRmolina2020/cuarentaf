@@ -147,30 +147,6 @@
                         ></i>
                     </button>
                 </form>
-                <div v-if="this.form.id != null">
-                    <div class="alert alert-primary mt-3" role="alert">
-                        Últimas 5 compras del clienteS.
-                    </div>
-
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Nombre</th>
-                                <th scope="col">Fecha venta</th>
-                                <th scope="col">Total</th>
-                                <th scope="col">Vendedor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="item in clientot" :key="item.id">
-                                <th scope="row">{{ item.name }}</th>
-                                <td>{{ item.date }}</td>
-                                <td>{{ item.tot }}</td>
-                                <td>{{ item.user }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
             </section>
         </Modal-Resource>
     </div>
@@ -208,11 +184,10 @@ export default {
     mixins: [add],
 
     computed: {
-        ...mapState(["urlclients", "clientot"]),
+        ...mapState(["urlclients"]),
     },
     methods: {
         show(row) {
-            this.$store.dispatch("clientTotactions", row.id);
             this.form.id = row.id;
             this.form.nit = row.nit;
             this.form.fullname = row.fullname;

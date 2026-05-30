@@ -10,7 +10,7 @@
         </div>
         <div class="table-responsive">
             <VTable
-                :data="users"
+                :data="usersall"
                 :filters="filters"
                 :page-size="5"
                 :currentPage.sync="currentPage"
@@ -87,18 +87,18 @@ export default {
         };
     },
     computed: {
-        ...mapState(["users", "status", "urlusers"]),
+        ...mapState(["usersall", "status", "urlusersall"]),
     },
     created() {
         this.getList();
     },
     methods: {
         getList() {
-            this.$store.dispatch("Useractions");
+            this.$store.dispatch("Userallactions");
         },
         async theState(row) {
             if (row.status == 1) {
-                let url = this.urlusers + "/locked/" + row.id;
+                let url = "api/users" + "/locked/" + row.id;
                 let response = await axios.put(url);
                 try {
                     Swal.fire({
@@ -110,7 +110,7 @@ export default {
                     console.log(error);
                 }
             } else {
-                let url = this.urlusers + "/available/" + row.id;
+                let url = "api/users" + "/available/" + row.id;
                 let response = await axios.put(url);
                 try {
                     Swal.fire({

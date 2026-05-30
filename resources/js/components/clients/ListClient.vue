@@ -27,7 +27,11 @@
                     </tr>
                 </template>
                 <template #body="{ rows }">
-                    <tr v-for="row in rows" :key="row.id">
+                    <tr
+                        v-for="row in rows"
+                        :key="row.id"
+                        class="small py-1 border-0"
+                    >
                         <td>{{ row.nit }}-{{ row.dv }}</td>
                         <td>{{ row.fullname }}</td>
                         <td>{{ row.phone }}</td>
@@ -37,9 +41,26 @@
                             <button
                                 type="button"
                                 @click="$emit('show', row)"
-                                class="btn bg-warning btn-sm"
+                                class="btn bg-warning btn-xs"
                             >
                                 <i class="fi fi-eye"></i>
+                            </button>
+                            <button
+                                @click="handleToggleStatus(row)"
+                                :class="
+                                    row.status
+                                        ? 'btn btn-success btn-xs'
+                                        : 'btn btn-danger btn-xs'
+                                "
+                            >
+                                <i
+                                    :class="
+                                        row.status
+                                            ? 'fi fi-radio-btn-active'
+                                            : 'fi fi-radio-btn-passive'
+                                    "
+                                    class="estado-icon"
+                                ></i>
                             </button>
                         </td>
                     </tr>
@@ -57,6 +78,7 @@
 </template>
 <script>
 import { mapState } from "vuex";
+import toggleStatus from "../../mixins/toggleStatus";
 export default {
     data() {
         return {
@@ -76,6 +98,15 @@ export default {
     methods: {
         getList() {
             this.$store.dispatch("Clientactions");
+        },
+        async handleToggleStatus(row) {
+            await toggleStatus({
+                id: row.id,
+                currentStatus: row.status,
+                entity: "cliente",
+                url: "/api/clients",
+                callback: this.getList,
+            });
         },
     },
 };

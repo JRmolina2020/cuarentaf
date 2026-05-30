@@ -48,7 +48,11 @@
                     </tr>
                 </template>
                 <template #body="{ rows }">
-                    <tr v-for="row in rows" :key="row.id">
+                    <tr
+                        v-for="row in rows"
+                        :key="row.id"
+                        @click="mostrarAlerta(row)"
+                    >
                         <td>{{ row.id }}</td>
                         <td>{{ row.tot | currency }}</td>
                         <td>{{ row.efecty | currency }}</td>
@@ -67,6 +71,17 @@
                         </td>
                         <td></td>
                     </tr>
+                    <div v-if="showAlerta" class="alerta-flotante">
+                        <button
+                            class="cerrar-alerta"
+                            @click="showAlerta = false"
+                        >
+                            ×
+                        </button>
+                        <div v-for="item in details" :key="item.id">
+                            {{ item.name }}
+                        </div>
+                    </div>
                 </template>
             </VTable>
             <div class="text-xs-center">
@@ -92,10 +107,12 @@ export default {
             search_sale: "",
             date: "",
             datetwo: "",
+            showAlerta: false,
+            alertaMensaje: "",
         };
     },
     computed: {
-        ...mapState(["factureState", "urlfactures"]),
+        ...mapState(["factureState", "urlfactures", "details"]),
     },
     components: {
         ModalFac,
@@ -104,6 +121,10 @@ export default {
         this.getList();
     },
     methods: {
+        mostrarAlerta(row) {
+            this.showAlerta = true;
+            this.$store.dispatch("FactureDetailactions", row.id);
+        },
         getList() {
             let obj = {
                 prop1: date_now,
@@ -135,3 +156,28 @@ export default {
     },
 };
 </script>
+<style>
+.cerrar-alerta {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+.alerta-flotante {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #111;
+    color: white;
+    padding: 14px 20px 14px 16px;
+    border-radius: 8px;
+    z-index: 9999;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+    min-width: 260px;
+    position: fixed;
+}
+</style>

@@ -9,12 +9,20 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-    // all users
+    // all users active
     public function index()
     {
         $users = User::with('roles:id,name')
             ->orderBy('id', 'desc')
             ->where('status', '1')
+            ->get();
+        return response()->json($users);
+    }
+    //all users
+    public function indexall()
+    {
+        $users = User::with('roles:id,name')
+            ->orderBy('id', 'desc')
             ->get();
         return response()->json($users);
     }

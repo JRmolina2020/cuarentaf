@@ -354,7 +354,7 @@ export default {
             if (id) {
                 let response = await axios.put(url + "/" + id, this.form);
                 try {
-                    this.$store.dispatch("Productactions", 1);
+                    this.$store.dispatch("Productproactions");
                     Swal.fire({
                         position: "center",
                         icon: "success",
@@ -380,7 +380,7 @@ export default {
                     });
 
                     $("#model").modal("hide");
-                    this.$store.dispatch("Productactions", 1);
+                    this.$store.dispatch("Productproactions");
                 } catch (error) {
                     console.log(error.response);
                 }
@@ -402,12 +402,12 @@ export default {
                             icon: "warning",
                             title: "Código duplicado",
                             text: "Este código ya está registrado.",
-                            width: "400px", // Ajusta el ancho de la alerta
-                            padding: "1.5rem", // Ajusta el espaciado interno
+                            width: "400px",
+                            padding: "1.5rem",
                             customClass: {
-                                popup: "swal-custom-popup", // Clase CSS personalizada
-                                title: "swal-custom-title", // Clase CSS para el título
-                                content: "swal-custom-text", // Clase CSS para el texto
+                                popup: "swal-custom-popup",
+                                title: "swal-custom-title",
+                                content: "swal-custom-text",
                             },
                         });
                         this.send = false;
@@ -445,6 +445,7 @@ export default {
             this.form.price_two = this.form.price_twoSv + porcentajeSv2;
         },
         show(row) {
+            this.form.code = row.code;
             this.form.id = row.id;
             this.form.type_iva = "";
             this.form.name = row.name;

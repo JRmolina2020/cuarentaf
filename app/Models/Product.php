@@ -14,11 +14,11 @@ class Product extends Model
         'price',
         'price_two',
         'cost',
+        'type_iva',
+        'categorie_id',
         'priceSv',
         'price_twoSv',
-        'type_iva',
         'stock',
-        'categorie_id',
         'vm',
         'vd',
     ];
